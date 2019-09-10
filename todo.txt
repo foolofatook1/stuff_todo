@@ -1,0 +1,25 @@
+/************************
+ *                      *
+ * Jacob's TODO List:   *
+ *                      *
+ ************************/
+
+Respond to Dana about installing plug ins [x]
+Linear Algebra [x]
+Check in on theme installation for neew EH website [ ]
+Look into hosting programmable ArcPy content on ArcGIS Online [ ]
+Pick up ergenomic stuff from library.  [ ]
+Drop off thingy at library? [ ]
+Buy Model T Keyboard? [x]
+Read the Cyborg manifesto? [ ]
+Read 'Algorithms of Oppresion [ ]
+
+HW:
+Linear Algebra reading [ ]
+
+Life:
+Make manifesto for Nybble Zine [ ]
+Get New York License [ ]
+Get New York plates and register car in New York [ ]
+Print FAFSA form and resbumit [ ]
+Go get labs done at LabCorp [ ]

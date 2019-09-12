@@ -1,101 +1,116 @@
 #!/usr/bin/perl
+
 use strict;
 use warnings;
+use Getopt::Long;
 
-my $file = '/home/jacob/Desktop/eh_web_dev/stuff_todo/todo.txt'; 
+my $file = '/home/jacob/Desktop/eh_web_dev/stuff_todo/todo.txt';
 
-
+# list of flags
+# my $help = '';
+my $all  = '';
+my $done = '';
+my $show = '';
+# my $finished = '';
+# my $add = '';
+# my $remove = '';
+# my $undo = '';
 
 handle_input();
 
-# handles command line flags.
 sub handle_input {
 
-    if ( arg_check() && $ARGV[0] eq "--done" ) {
-        done();
-    }
-    elsif ( defined $ARGV[0] && $ARGV[0] eq "--just-did" ) {
-        if ( not defined $ARGV[1] ) {
-            print "This flag requires two arguments.\n";
-            exit;
-        }
-        else {
-            just_did();
-        }
-    }
-    # default is to give you your current todo list
-    else {
-        todo();
-    }
+    GetOptions(
+        '' => \&todo,
+        'all'  => \&all,
+        'done' => \&done,
+        'show=i' => \&show
+    );
 }
 
-
-
 ##################*helper functions*####################
-
-# check args.
-#sub check_args {
-#    my (
-#    if (defined $ARGV[0]) {
-#        return 1; 
-#    }
-#    else {
-#        return 0;
-#    }
-#}
-
-# check flags.
 
 # prints what you still need to do on the list.
 sub todo {
 
-    open FILE, "<$file"
-      or die "Could not open log file. $!\n";
+    read_file();
 
     my $count = 1;
 
     while (<FILE>) {
         print $count++ . ") " . $_ if $_ =~ /\[ \]/;
     }
+    close FILE;
+    exit;
 }
 
 # prints what you have done.
 sub done {
 
-    open( FILE, "<$file" )
-      or die "Could not open log file. $!\n";
+    read_file();
 
     my $count = 1;
 
     while (<FILE>) {
         print $count++ . ") " . $_ if $_ =~ /\[x\]/;
     }
+    close FILE;
+    exit;
+}
+
+sub all {
+
+    read_file();
+
+    my $count = 1;
+
+    while (<FILE>) {
+        print $count++ . ") " . $_ if $_ =~ /\[/;
+        
+    }
+    close FILE;
+    exit;
 }
 
 # checks something off of the list.
-sub just_did {
+sub show {
 
-    open( FILE, "<$file" )
-      or die("Could not open log file. $!\n");
+    my ($flag, $list_num) = @_;
 
-    my $count = 0;
+    read_file();
+
+    my $count = 1;
+
     while (<FILE>) {
-        if ($_ =~ /\[ \]/) {
-            $count++;
-        }
-        if($count eq $ARGV[1]){
+        if ( $count == $list_num ) {
             print $count . ") " . $_;
+            close FILE;
+            exit;
         }
+        $count++;
     }
+    close FILE;
+    print "Sorry. The line number you entered is greater than the list size.\n";
 }
 
 #######*helper functions for helper functions*#######
 
+# open and read from file
+sub read_file {
+    open( FILE, "<$file" )
+      or die "Could not open log file. $!\n";
+}
+
+# open and write to file
+sub write_file {
+    open( FILE, ">$file" )
+      or die "Could not open log file. $!\n";
+}
+
 # returns the amount of tasks todo.
 sub how_much_todo {
 
-    open( FILE, "<$file" )
-      or die "Could not open log file. $!\n";
+    read_file();
 
     my $count = 0;
 
@@ -108,11 +123,10 @@ sub how_much_todo {
 # returns the amount of tasks you've done.
 sub how_much_isdone {
 
-    open ( FILE, "<$file" )
-      or die "Could not open log file. $!\n";
+    read_file();
 
     my $count = 0;
-    
+
     while (<FILE>) {
         $count++ if $_ =~ /\[x\]/;
     }

@@ -5,7 +5,7 @@ use warnings;
 use Getopt::Long;
 use Tie::File;
 
-my $file = '/home/jacob/Desktop/eh_web_dev/stuff_todo/todo.txt';
+my $file = './todo.txt';
 
 # list of flags
 # my $help = '';
@@ -14,9 +14,10 @@ my $done       = '';
 my $show       = '';
 my $finished   = '';
 my $unfinished = '';
+my $put        = '';
+my $remove     = '';
 
-# my $add = '';
-# my $remove = '';
+# todo: add the following subroutines:
 # my $undo = '';
 
 handle_input();
@@ -29,7 +30,9 @@ sub handle_input {
             'done'         => \&done,
             'show=i'       => \&show,
             'finished=i'   => \&finished,
-            'unfinished=i' => \&unfinished
+            'unfinished=i' => \&unfinished,
+            'put=s'        => \&put,
+            'remove=i'     => \&remove
         );
     }
 
@@ -55,7 +58,7 @@ sub todo {
     exit;
 }
 
-# prints what you have done.
+# prints tasks that have been done.
 sub done {
 
     read_file();
@@ -68,6 +71,7 @@ sub done {
     exit;
 }
 
+# shows all tasks
 sub all {
 
     read_file();
@@ -81,7 +85,7 @@ sub all {
     exit;
 }
 
-# checks something off of the list.
+# shows a single task
 sub show {
 
     my ( $flag, $list_num ) = @_;
@@ -95,21 +99,63 @@ sub show {
             close FILE;
             exit;
         }
-        $count++;
+        $count++ if $_ =~ /\[/;
     }
     close FILE;
     print
 "Sorry. The line number you entered is greater or less than the list size.\n";
 }
 
+# checks a task off the list
 sub finished {
     my ( $flag, $list_num ) = @_;
     replace( "\[ \]", "\[x\]", $list_num );
 }
 
+# removes a check from a checked task on the list.
 sub unfinished {
     my ( $flag, $list_num ) = @_;
     replace( "\[x\]", "\[ \]", $list_num );
+}
+
+# adds a task to the list
+sub put {
+
+    my ( $flag, $string ) = @_;
+
+    $string = $string . " \[ \]\n";
+
+    my @array = '';
+    tie @array, 'Tie::File', $file
+      or die "Could not open the log file. $!\n";
+
+    push @array, $string;
+    untie @array;
+}
+
+# removes a task from the list
+sub remove {
+
+    my ( $flag, $list_num ) = @_;
+
+    my @array = '';
+    my $count = 1;
+
+    tie @array, 'Tie::File', $file,
+      or die "Could not open log file. $!\n";
+
+    for (@array) {
+        if ( $count == $list_num ) {
+            delete $array[$count];
+            @array = grep { $_ ne '' } @array;
+            untie @array;
+            exit;
+        }
+        $count++ if $_ =~ /\[/;
+    }
+    untie @array;
+    print
+"Sorry. The line number you entered is greater or less than the list size.\n";
 }
 
 #######*helper functions for helper functions*#######
@@ -120,19 +166,24 @@ sub replace {
     my ( $old, $new, $list_num ) = @_;
 
     my @array = '';
-    my $count = 0;
+    my $count = 1;
 
     tie @array, 'Tie::File', $file,
       or die "Could not open log file. $!\n";
 
     for (@array) {
-        if ( $count == $list_num - 1 ) {
+        if ( $count == $list_num ) {
+            print "finding and replacing: " . $array[$count] . "\n";
             s/\Q$old/$new/;
-            print $array[$count] . "\n";
+            print "after: " . $array[$count] . "\n";
+
+            # print $count . ") " . $array[$count] . "\n";
+            untie @array;
             exit;
         }
-        $count++;
+        print $count++ . ") " . $_ . "\n" if $_ =~ /\[/;
     }
+    untie @array;
     print
 "Sorry. The line number you entered is greater or less than the list size.\n";
 }

@@ -3,15 +3,17 @@
 use strict;
 use warnings;
 use Getopt::Long;
+use Tie::File;
 
 my $file = '/home/jacob/Desktop/eh_web_dev/stuff_todo/todo.txt';
 
 # list of flags
 # my $help = '';
-my $all  = '';
-my $done = '';
-my $show = '';
-# my $finished = '';
+my $all      = '';
+my $done     = '';
+my $show     = '';
+my $finished = '';
+my $unfinished = '';
 # my $add = '';
 # my $remove = '';
 # my $undo = '';
@@ -20,12 +22,21 @@ handle_input();
 
 sub handle_input {
 
-    GetOptions(
-        '' => \&todo,
-        'all'  => \&all,
-        'done' => \&done,
-        'show=i' => \&show
-    );
+    if (@ARGV) {
+        GetOptions(
+            'all'    => \&all,
+            'done'   => \&done,
+            'show=i' => \&show,
+            'finished=i' => \&finished,
+            'unfinished=i' => \&unfinished
+        );
+    }
+
+    # default
+    else {
+        todo();
+    }
+
 }
 
 ##################*helper functions*####################
@@ -66,7 +77,7 @@ sub all {
 
     while (<FILE>) {
         print $count++ . ") " . $_ if $_ =~ /\[/;
-        
+
     }
     close FILE;
     exit;
@@ -75,7 +86,7 @@ sub all {
 # checks something off of the list.
 sub show {
 
-    my ($flag, $list_num) = @_;
+    my ( $flag, $list_num ) = @_;
 
     read_file();
 
@@ -90,20 +101,50 @@ sub show {
         $count++;
     }
     close FILE;
-    print "Sorry. The line number you entered is greater than the list size.\n";
+    print "Sorry. The line number you entered is greater or less than the list size.\n";
+}
+
+sub finished {
+
+    my ($flag, $list_num) = @_;
+
+    replace("\[ \]", "\[x\]", $list_num);
+}
+
+sub unfinished {
+    
+    my ($flag, $list_num) = @_;
+
+    replace("\[x\]", "\[ \]", $list_num);
 }
 
 #######*helper functions for helper functions*#######
 
+sub replace {
+   
+    # old string, new string, line of list to do replacement
+    my ($old, $new, $list_num) = @_;
+
+    my @array = '';
+    my $count = 0;
+
+    tie @array, 'Tie::File', $file,
+      or die "Could not open log file. $!\n";
+
+    for (@array) {
+        if ($count == $list_num-1) {
+            s/\Q$old/$new/;
+            print $array[$count] . "\n";
+            exit;
+        }
+        $count++;
+    }
+    print "Sorry. The line number you entered is greater or less than the list size.\n";
+}
+    
 # open and read from file
 sub read_file {
     open( FILE, "<$file" )
-      or die "Could not open log file. $!\n";
-}
-
-# open and write to file
-sub write_file {
-    open( FILE, ">$file" )
       or die "Could not open log file. $!\n";
 }
 

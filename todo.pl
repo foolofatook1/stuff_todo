@@ -25,6 +25,8 @@ handle_input();
 sub handle_input {
 
     if (@ARGV) {
+        open LESS, '| less' or die $!;
+        select LESS;
         GetOptions(
             'all'          => \&all,
             'done'         => \&done,
@@ -34,11 +36,17 @@ sub handle_input {
             'put=s'        => \&put,
             'remove=i'     => \&remove
         );
+        select STDOUT;
+        close LESS;
     }
 
     # default
     else {
+        open LESS, '| less' or die $!;
+        select LESS;
         todo();
+        select STDOUT;
+        close LESS;
     }
 
 }
@@ -145,10 +153,10 @@ sub remove {
       or die "Could not open log file. $!\n";
 
     for (@array) {
-        if ( $count == $list_num ) {
+        if ( $count == $list_num - 1 ) {
+            print "deleting " . $array[$count] . "\n" if $array[$count];
             delete $array[$count];
             @array = grep { $_ ne '' } @array;
-            untie @array;
             exit;
         }
         $count++ if $_ =~ /\[/;
@@ -173,9 +181,7 @@ sub replace {
 
     for (@array) {
         if ( $count == $list_num ) {
-            print "finding and replacing: " . $array[$count] . "\n";
             s/\Q$old/$new/;
-            print "after: " . $array[$count] . "\n";
 
             # print $count . ") " . $array[$count] . "\n";
             untie @array;

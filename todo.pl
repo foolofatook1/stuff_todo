@@ -20,13 +20,16 @@ my $remove     = '';
 # todo: add the following subroutines:
 # my $undo = '';
 
+# currently outputs everything to less :)
+open LESS, '| less' or die $!;
+select LESS;
 handle_input();
+select STDOUT;
+close LESS;
 
 sub handle_input {
 
     if (@ARGV) {
-        open LESS, '| less' or die $!;
-        select LESS;
         GetOptions(
             'all'          => \&all,
             'done'         => \&done,
@@ -36,17 +39,11 @@ sub handle_input {
             'put=s'        => \&put,
             'remove=i'     => \&remove
         );
-        select STDOUT;
-        close LESS;
     }
 
     # default
     else {
-        open LESS, '| less' or die $!;
-        select LESS;
         todo();
-        select STDOUT;
-        close LESS;
     }
 
 }
@@ -131,6 +128,7 @@ sub put {
 
     my ( $flag, $string ) = @_;
 
+    print "Added " . "'" . $string . "'" . " to your todo list.";
     $string = $string . " \[ \]\n";
 
     my @array = '';
@@ -182,12 +180,9 @@ sub replace {
     for (@array) {
         if ( $count == $list_num ) {
             s/\Q$old/$new/;
-
-            # print $count . ") " . $array[$count] . "\n";
             untie @array;
             exit;
         }
-        print $count++ . ") " . $_ . "\n" if $_ =~ /\[/;
     }
     untie @array;
     print

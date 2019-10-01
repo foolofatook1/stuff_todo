@@ -1,11 +1,19 @@
 #!/usr/bin/perl
 
+###############################################
+# TODO:                                       #
+# Add categories that sort todo list such as: #
+# w -- work related                           #
+# l -- life related                           #
+# e -- etc.                                   #
+###############################################
+
 use strict;
 use warnings;
 use Getopt::Long;
 use Tie::File;
 
-my $file = './todo.txt';
+my $file = '/home/jacob/Desktop/eh_web_dev/stuff_todo/todo.txt';
 
 # list of flags
 # my $help = '';
